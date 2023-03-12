@@ -118,7 +118,7 @@ class Summarizer:
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are an AI summarizer tool. Your mission is to help summarize Youtube videos.",
+                        "content": "You are an AI summariser. Your task is to summarise a given text clearly, comprehensively and in an understandable way.",
                     },
                     {
                         "role": "user",
