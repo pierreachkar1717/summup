@@ -1,13 +1,14 @@
+"""
+A module that contains a class that summarizes a given text using a specified summarization method. 
+"""
+
 import re
-import nltk
 from nltk.tokenize import sent_tokenize
 from dotenv import load_dotenv
 import os
 import openai
 from nltk.corpus import stopwords
-from youtube_transcript_api import YouTubeTranscriptApi
-from pypdf import PdfReader
-
+import nltk
 
 class Summarizer:
     """
@@ -100,7 +101,7 @@ class Summarizer:
 
         return chunks
 
-    def _summarize_with_openai(self):
+    def _summarize_with_gpt(self):
         """
         Summarize the input text using OpenAI's GPT-3.5 Turbo API.
 
@@ -143,7 +144,7 @@ class Summarizer:
             A string containing the summarized text.
         """
         if self.method == "openai":
-            return self._summarize_with_openai()
+            return self._summarize_with_gpt()
         else:
             raise ValueError("Invalid summarization method.")
 
@@ -162,91 +163,4 @@ class Summarizer:
         ]
         return "\n".join(bullet_points)
 
-
-class VideoSummarizes(Summarizer):
-    """
-    A class that summarizes a given YouTube video using a specified summarization method.
-
-    Attributes:
-        url (str): The URL of the YouTube video.
-        text (str): The transcript of the YouTube video.
-        method (str): The summarization method.
-        chunks (list of str): A list of preprocessed text chunks, where each chunk
-        contains only full sentences.
-    """
-
-    def __init__(self, url, method):
-        self.url = url
-        self.text = self.get_video_transcript(url)
-        self.method = method
-        self.chunks = self.preprocess_and_chunk_text(self.text)
-
-    @staticmethod
-    def get_video_transcript(video_url):
-        """
-        Retrieve the transcript of a YouTube video using its URL, and its text.
-
-        Args:
-            video_url (str): The URL of the YouTube video.
-
-        Returns:
-            A dictionary with the following keys:
-            - 'transcript': a list of dictionaries, where each dictionary represents a caption.
-                Each dictionary has the following keys: 'text', 'start', and 'duration'.
-                If the transcript cannot be retrieved, this key has a value of None.
-            - 'transcript_text': a string representing the concatenation of all captions' text.
-                If the transcript cannot be retrieved, this key has a value of None.
-        """
-        video_id = video_url.split("v=")[1]
-        try:
-            transcript = YouTubeTranscriptApi.get_transcript(video_id)
-            captions = [caption["text"] for caption in transcript]
-            transcript_text = " ".join(captions)
-        except YouTubeTranscriptApi.exceptions.TranscriptNotFoundError:
-            transcript = None
-            transcript_text = None
-        return transcript_text
-
-
-class PDFSummarizer(Summarizer):
-    """
-    A class that summarizes a given PDF file using a specified summarization method.
-
-    Attributes:
-        path (str): The path of the PDF file.
-        text (str): The text of the PDF file.
-        method (str): The summarization method.
-        chunks (list of str): A list of preprocessed text chunks, where each chunk
-        contains only full sentences.
-    """
-
-    def __init__(self, path, method):
-        self.path = path
-        self.text = self.get_pdf_text(path)
-        self.method = method
-        self.chunks = self.preprocess_and_chunk_text(self.text)
-
-    @staticmethod
-    def get_pdf_text(pdf_path):
-        """
-        Retrieve the text of a PDF file using its path.
-
-        Args:
-            pdf_path (str): The path of the PDF file.
-
-        Returns:
-            A string representing the text of the PDF file.
-        """
-        reader = PdfReader(pdf_path)
-
-        # get the number of pages
-        num_pg = len(reader.pages)
-
-        all_content = list()
-        for i in range(num_pg):
-            page = reader.pages[i]
-            text = page.extract_text()
-            all_content.append(text)
-
-        all_content = " ".join(all_content)
-        return all_content
+# TODO: Add more summarization methods from hugging face transformers
