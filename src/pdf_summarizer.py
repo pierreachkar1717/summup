@@ -5,6 +5,7 @@
 from summarizer import Summarizer
 from pypdf import PdfReader
 
+
 class PDFSummarizer(Summarizer):
     """
     A class that summarizes a given PDF file using a specified summarization method.

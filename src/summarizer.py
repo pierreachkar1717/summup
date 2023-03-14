@@ -10,6 +10,7 @@ import openai
 from nltk.corpus import stopwords
 import nltk
 
+
 class Summarizer:
     """
     A class that summarizes a given text using a specified summarization method.
@@ -21,7 +22,7 @@ class Summarizer:
             contains only full sentences.
 
     Methods:
-        preprocess_and_chunk_transcript(text, chunk_size=2500):
+        preprocess_and_chunk_text(text, chunk_size=2500):
             Preprocess a raw text by removing unnecessary tokens, tokenize it into sentences,
             and divide it into chunks. Each chunk contains only full sentences.
     """
@@ -46,45 +47,45 @@ class Summarizer:
         Each chunk contains only full sentences.
 
         Args:
-            text (str): The raw transcript text.
+            text (str): The raw text text.
 
         Returns:
-            A list of strings, where each string represents a chunk of the transcript.
+            A list of strings, where each string represents a chunk of the text.
             Each chunk has a length of at most chunk_size tokens, and contains only full sentences.
         """
 
         stop_words = set(stopwords.words("english"))
 
-        # Preprocess the transcript by removing unnecessary tokens and stopwords
-        cleaned_transcript = re.sub(
+        # Preprocess the text by removing unnecessary tokens and stopwords
+        cleanded_text = re.sub(
             r"\[.*?\]", "", text
         )  # remove square brackets and their contents
-        cleaned_transcript = re.sub(
-            r"\(.*?\)", "", cleaned_transcript
+        cleanded_text = re.sub(
+            r"\(.*?\)", "", cleanded_text
         )  # remove parentheses and their contents
-        cleaned_transcript = re.sub(
-            r"<.*?>", "", cleaned_transcript
+        cleanded_text = re.sub(
+            r"<.*?>", "", cleanded_text
         )  # remove angle brackets and their contents
-        cleaned_transcript = re.sub(
-            r"\n+", " ", cleaned_transcript
+        cleanded_text = re.sub(
+            r"\n+", " ", cleanded_text
         )  # replace multiple line breaks with a single space
-        cleaned_transcript = re.sub(
-            r"[^\w\s\.\?\!]", "", cleaned_transcript
+        cleanded_text = re.sub(
+            r"[^\w\s\.\?\!]", "", cleanded_text
         )  # remove all non-word, non-space, non-punctuation characters
-        cleaned_transcript = re.sub(r"[^\x00-\x7F]+", "", cleaned_transcript)
-        cleaned_transcript = " ".join(
-            [word for word in cleaned_transcript.split() if word not in stop_words]
+        cleanded_text = re.sub(r"[^\x00-\x7F]+", "", cleanded_text)
+        cleanded_text = " ".join(
+            [word for word in cleanded_text.split() if word not in stop_words]
         )
 
-        # Tokenize the transcript into sentences
-        sentences = sent_tokenize(cleaned_transcript)
+        # Tokenize the text into sentences
+        sentences = sent_tokenize(cleanded_text)
 
-        # Divide the transcript into chunks
+        # Divide the text into chunks
         MAX_CHUNK_LENGTH = chunk_size
         chunks = []
         current_chunk = ""
         for sentence in sentences:
-            if len(current_chunk) + len(sentence) + 1 <= MAX_CHUNK_LENGTH:
+            if len(current_chunk) + len(sentence.split()) + 1 <= MAX_CHUNK_LENGTH:
                 # Add sentence to current chunk
                 current_chunk += sentence + " "
             else:
@@ -122,7 +123,7 @@ class Summarizer:
                     },
                     {
                         "role": "user",
-                        "content": f"Summarize the following text: {chunk}",
+                        "content": f"Summarize the following text in plain language: {chunk}",
                     },
                 ],
             )
@@ -138,20 +139,23 @@ class Summarizer:
 
     def summarize(self):
         """
-        Summarize the input text using the specified summarization method.
+        Summarize the input text using the specified summarization method and export the output to text file.
 
         Returns:
             A string containing the summarized text.
         """
         if self.method == "openai":
-            return self._summarize_with_gpt()
+            summary = self._summarize_with_gpt()
+            with open("summary.txt", "w") as f:
+                f.write(summary)
+            return summary
         else:
             raise ValueError("Invalid summarization method.")
 
     def summarize_in_bullets(self):
         """
         Summarize the input text using the specified summarization method,
-        and format the output as a list of bullet points.
+        and format the output as a list of bullet points. Summary is also exported to text file.
 
         Returns:
             A string containing the summarized text, formatted as a list of bullet points.
@@ -161,6 +165,11 @@ class Summarizer:
         bullet_points = [
             f"* {point.strip()}" for point in bullet_points if point.strip()
         ]
+        with open("summary.txt", "w") as f:
+            f.write("\n".join(bullet_points))
+
         return "\n".join(bullet_points)
 
+
 # TODO: Add more summarization methods from hugging face transformers
+# TODO: Add getpass to ask for API key
