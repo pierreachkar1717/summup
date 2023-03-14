@@ -5,6 +5,7 @@ A module that summarizes a given YouTube video using a specified summarization m
 from summarizer import Summarizer
 from youtube_transcript_api import YouTubeTranscriptApi
 
+
 class VideoSummarizer(Summarizer):
     """
     A class that summarizes a given YouTube video using a specified summarization method.
@@ -48,5 +49,6 @@ class VideoSummarizer(Summarizer):
             transcript = None
             transcript_text = None
         return transcript_text
+
 
 # TODO: Add Whisper to transcript youtube videos that don't have transcripts
