@@ -6,7 +6,10 @@ Summup is a Python package for summarizing text from different sources, includin
 
 ## Current Features
 summarize_text: Summarizes text from a string or a file
+
 summarize_video: Summarizes text from a video url
+
 summarize_pdf: Summarizes text from a pdf file
+
 summarize_arxiv: Summarizes text from an arxiv paper
 
