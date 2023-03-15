@@ -3,12 +3,12 @@ A module that contains a class that summarizes a given text using a specified su
 """
 
 import re
-from nltk.tokenize import sent_tokenize
 from dotenv import load_dotenv
 import os
 import openai
 from nltk.corpus import stopwords
 import nltk
+from transformers import pipeline
 
 
 class Summarizer:
@@ -37,10 +37,10 @@ class Summarizer:
         """
         self.text = text
         self.method = method
-        self.chunks = self.preprocess_and_chunk_text(text)
+        self.chunks = self.preprocess_and_chunk_text(self.text, self.method)
 
     @staticmethod
-    def preprocess_and_chunk_text(text, chunk_size=3000):
+    def preprocess_and_chunk_text(text, method):
         """
         Preprocess a raw text by removing unnecessary tokens,
         tokenize it into sentences, and divide it into chunks.
@@ -48,6 +48,7 @@ class Summarizer:
 
         Args:
             text (str): The raw text text.
+            method (str): The summarization method to be used.
 
         Returns:
             A list of strings, where each string represents a chunk of the text.
@@ -77,11 +78,15 @@ class Summarizer:
             [word for word in cleanded_text.split() if word not in stop_words]
         )
 
-        # Tokenize the text into sentences
-        sentences = sent_tokenize(cleanded_text)
+        # split the text into sentences
+        sentences = cleanded_text.split(".")
 
         # Divide the text into chunks
-        MAX_CHUNK_LENGTH = chunk_size
+        if method == "transformers":
+            MAX_CHUNK_LENGTH = 512
+        elif method == "gpt":
+            MAX_CHUNK_LENGTH = 3000
+
         chunks = []
         current_chunk = ""
         for sentence in sentences:
@@ -109,8 +114,14 @@ class Summarizer:
         Returns:
             A string containing the summarized text.
         """
+        # check if the OpenAI API key is set
         load_dotenv()
-        openai.api_key = os.getenv("OPENAI_API_KEY")
+        if not os.getenv("OPENAI_API_KEY"):
+            raise Exception(
+                "OpenAI API key is not set. Please set the OPENAI_API_KEY environment variable."
+            )
+        else:
+            openai.api_key = os.getenv("OPENAI_API_KEY")
         full_summary = list()
 
         for chunk in self.chunks:
@@ -137,25 +148,39 @@ class Summarizer:
 
         return full_summary
 
+    def _summarize_with_transformers(self):
+        """
+        Summarize the input text using hugging face transformers.
+
+        Returns:
+            A string containing the summarized text.
+        """
+        summarizer = pipeline("summarization", model="philschmid/bart-large-cnn-samsum")
+        full_summary = list()
+        for chunk in self.chunks:
+            summary = summarizer(chunk)
+            full_summary.append(summary[0]["summary_text"])
+        full_summary = " ".join(full_summary)
+        return full_summary
+
     def summarize(self):
         """
-        Summarize the input text using the specified summarization method and export the output to text file.
+        Summarize the input text using the specified summarization method.
 
         Returns:
             A string containing the summarized text.
         """
         if self.method == "gpt":
             summary = self._summarize_with_gpt()
-            with open("summary.txt", "w") as f:
-                f.write(summary)
             return summary
-        else:
-            raise ValueError("Invalid summarization method.")
+        elif self.method == "transformers":
+            summary = self._summarize_with_transformers()
+            return summary
 
     def summarize_in_bullets(self):
         """
         Summarize the input text using the specified summarization method,
-        and format the output as a list of bullet points. Summary is also exported to text file.
+        and format the output as a list of bullet points.
 
         Returns:
             A string containing the summarized text, formatted as a list of bullet points.
@@ -165,11 +190,7 @@ class Summarizer:
         bullet_points = [
             f"* {point.strip()}" for point in bullet_points if point.strip()
         ]
-        with open("summary.txt", "w") as f:
-            f.write("\n".join(bullet_points))
-
         return "\n".join(bullet_points)
 
 
-# TODO: Add more summarization methods from hugging face transformers
 # TODO: Add getpass to ask for API key

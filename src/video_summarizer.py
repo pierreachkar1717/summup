@@ -1,7 +1,6 @@
 """ 
 A module that summarizes a given YouTube video using a specified summarization method.
 """
-
 from summarizer import Summarizer
 from youtube_transcript_api import YouTubeTranscriptApi
 
@@ -22,7 +21,7 @@ class VideoSummarizer(Summarizer):
         self.url = url
         self.text = self.get_video_transcript(url)
         self.method = method
-        self.chunks = self.preprocess_and_chunk_text(self.text)
+        self.chunks = self.preprocess_and_chunk_text(self.text, self.method)
 
     @staticmethod
     def get_video_transcript(video_url):
@@ -52,3 +51,6 @@ class VideoSummarizer(Summarizer):
 
 
 # TODO: Add Whisper to transcript youtube videos that don't have transcripts
+
+test = VideoSummarizer("https://www.youtube.com/watch?v=OU72wcPyUfM", "transformers")
+print(test.summarize())

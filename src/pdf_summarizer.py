@@ -22,7 +22,7 @@ class PDFSummarizer(Summarizer):
         self.path = path
         self.text = self.get_pdf_text(path)
         self.method = method
-        self.chunks = self.preprocess_and_chunk_text(self.text)
+        self.chunks = self.preprocess_and_chunk_text(self.text, self.method)
 
     @staticmethod
     def get_pdf_text(pdf_path):

@@ -12,7 +12,7 @@ class WebpageSummarizer(Summarizer):
         self.text = self.get_url_content(url)
         self.method = method
         self.url = url
-        self.chunks = self.preprocess_and_chunk_text(self.text)
+        self.chunks = self.preprocess_and_chunk_text(self.text, self.method)
 
     @staticmethod
     def get_url_content(url):
@@ -37,3 +37,8 @@ class WebpageSummarizer(Summarizer):
         texts = soup.findAll(text=True)
         visible_texts = filter(tag_visible, texts)
         return " ".join(t.strip() for t in visible_texts)
+
+
+test = WebpageSummarizer("transformers", "https://www.tagesschau.de/")
+sum = test.summarize()
+print(sum)
