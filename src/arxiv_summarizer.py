@@ -27,7 +27,7 @@ class arxiv_summarizer(PDFSummarizer):
         """
         Retrieve the text of a arxiv paper using its link.
 
-        
+
         """
         # access the arxiv link and and get the pdf file
         response = requests.get(link)

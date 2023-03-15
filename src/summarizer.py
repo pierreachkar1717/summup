@@ -144,7 +144,7 @@ class Summarizer:
         Returns:
             A string containing the summarized text.
         """
-        if self.method == "openai":
+        if self.method == "gpt":
             summary = self._summarize_with_gpt()
             with open("summary.txt", "w") as f:
                 f.write(summary)
