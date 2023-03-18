@@ -20,14 +20,12 @@ class arxiv_summarizer(PDFSummarizer):
         self.arxiv_paper_link = arxiv_paper_link
         self.method = method
         self.text = self.get_arxiv_text(arxiv_paper_link)
-        self.chunks = self.preprocess_and_chunk_text(self.text)
+        self.chunks = self.preprocess_and_chunk_text(self.text, self.method)
 
     @staticmethod
     def get_arxiv_text(link):
         """
         Retrieve the text of a arxiv paper using its link.
-
-
         """
         # access the arxiv link and and get the pdf file
         response = requests.get(link)
@@ -56,8 +54,14 @@ class arxiv_summarizer(PDFSummarizer):
         Returns:
             A string containing the summarized text.
         """
+        # check if the OpenAI API key is set
         load_dotenv()
-        openai.api_key = os.getenv("OPENAI_API_KEY")
+        if not os.getenv("OPENAI_API_KEY"):
+            raise Exception(
+                "OpenAI API key is not set. Please set the OPENAI_API_KEY environment variable."
+            )
+        else:
+            openai.api_key = os.getenv("OPENAI_API_KEY")
         full_summary = list()
 
         for chunk in self.chunks:
@@ -84,17 +88,5 @@ class arxiv_summarizer(PDFSummarizer):
 
         return full_summary
 
-    def summarize(self):
-        """
-        Summarize the input text using the specified summarization method and export the output to text file.
-
-        Returns:
-            A string containing the summarized text.
-        """
-        if self.method == "openai":
-            summary = self._summarize_with_gpt()
-            with open("summary.txt", "w") as f:
-                f.write(summary)
-            return summary
-        else:
-            raise ValueError("Invalid summarization method.")
+paper = arxiv_summarizer('https://arxiv.org/abs/2303.03982', 'gpt')
+print(paper.summarize())
